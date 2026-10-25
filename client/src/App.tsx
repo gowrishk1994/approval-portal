@@ -82,7 +82,7 @@ export default function App() {
   useEffect(() => {
     if (!user || !signatureLinkWorkflowId) return;
     if (user.role !== 'approver') {
-      setError('This signature link is only available to User A.');
+      setError('This signature link is only available to the assigned approver.');
       return;
     }
     void openWorkflow(signatureLinkWorkflowId);
@@ -120,7 +120,7 @@ export default function App() {
         ? result.notificationDelivered
         : undefined;
       setNotice(notificationDelivered === true
-        ? `${successMessage} An email notification was sent to User A.`
+        ? `${successMessage} An email notification was sent to ${selectedWorkflow.approver.name}.`
         : notificationDelivered === false
           ? `${successMessage} Email notification could not be sent. Configure SMTP in server/.env.`
           : successMessage);

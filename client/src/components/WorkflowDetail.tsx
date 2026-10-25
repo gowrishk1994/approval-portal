@@ -53,6 +53,10 @@ function humanizeAction(action: string) {
   return action.replaceAll('.', ' ').replace(/\b\w/g, (character) => character.toUpperCase());
 }
 
+function getInitials(name: string) {
+  return name.trim().split(/\s+/).slice(0, 2).map((part) => part[0]).join('').toUpperCase();
+}
+
 export function WorkflowDetail({
   workflow,
   user,
@@ -167,14 +171,14 @@ export function WorkflowDetail({
           </section>}
 
           {workflow.status === 'draft' && !isApprover && <section className="panel decision-panel">
-            <div className="decision-heading"><span className="decision-icon decision-primary"><Mail size={20} /></span><div><h2>Request approval</h2><p>Submit the uploaded documents to User A for review.</p></div></div>
+            <div className="decision-heading"><span className="decision-icon decision-primary"><Mail size={20} /></span><div><h2>Request approval</h2><p>Submit the uploaded documents to {workflow.approver.name} for review.</p></div></div>
             <button type="button" className="button button-primary" disabled={busy || workflow.documents.length === 0} onClick={() => void onRequestApproval()}><Mail size={16} /> Request approval</button>
             {workflow.documents.length === 0 && <p className="field-hint">Upload at least one document before submitting this project.</p>}
           </section>}
 
           {workflow.status === 'completed' && <section className="panel completion-panel">
             <span className="completion-icon"><Check size={25} /></span><h2>Workflow completed</h2><p>The project has been approved and signed.</p>
-            <div className="signature-receipt"><span>Signed by</span><strong>{workflow.signature?.name ?? 'User A'}</strong><small>{workflow.signedAt ? formatDate(workflow.signedAt, true) : ''}</small></div>
+            <div className="signature-receipt"><span>Signed by</span><strong>{workflow.signature?.name ?? workflow.approver.name}</strong><small>{workflow.signedAt ? formatDate(workflow.signedAt, true) : ''}</small></div>
           </section>}
         </div>
 
@@ -185,7 +189,7 @@ export function WorkflowDetail({
               <div><dt>Customer</dt><dd>{workflow.customer}</dd></div>
               <div><dt>Project</dt><dd>{workflow.projectName}</dd></div>
               <div><dt>Workflow ID</dt><dd className="monospace">{workflow.id.slice(0, 12)}…</dd></div>
-              <div><dt>Assigned approver</dt><dd><span className="approver-initials">UA</span><span className="approver-copy"><strong>User A</strong><small>gowrish2011@gmail.com</small></span></dd></div>
+              <div><dt>Assigned approver</dt><dd><span className="approver-initials">{getInitials(workflow.approver.name)}</span><span className="approver-copy"><strong>{workflow.approver.name}</strong><small>{workflow.approver.email}</small></span></dd></div>
               <div><dt>Created</dt><dd>{formatDate(workflow.createdAt)}</dd></div>
               {workflow.approvedAt && <div><dt>Approved</dt><dd>{formatDate(workflow.approvedAt)}</dd></div>}
               {workflow.signedAt && <div><dt>Signed</dt><dd>{formatDate(workflow.signedAt)}</dd></div>}

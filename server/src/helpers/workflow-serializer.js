@@ -4,10 +4,11 @@ export function toPublicDocument(document) {
 }
 
 export function toPublicWorkflow(workflow, { includeAuditEvents = false } = {}) {
-  const { documents = [], auditEvents, ...workflowFields } = workflow;
+  const { documents = [], auditEvents, approver, ...workflowFields } = workflow;
   return {
     ...workflowFields,
     documents: documents.map((document) => toPublicDocument(document)),
+    ...(approver ? { approver } : {}),
     ...(includeAuditEvents ? { auditEvents: auditEvents ?? [] } : {}),
   };
 }

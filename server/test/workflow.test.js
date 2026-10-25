@@ -19,8 +19,6 @@ async function resetDatabase() {
   await AuditEvent.destroy({ where: {} });
   await Document.destroy({ where: {} });
   await Workflow.destroy({ where: {} });
-  await User.update({ name: 'User A', role: 'approver' }, { where: { id: 'user-a' } });
-  await User.update({ name: 'Project Requester', email: 'requester@example.com', role: 'requester' }, { where: { id: 'requester' } });
   await fs.mkdir(uploadDirectory, { recursive: true });
   for (const entry of await fs.readdir(uploadDirectory)) {
     if (entry !== '.gitkeep') {
@@ -65,6 +63,7 @@ test('login validates credentials and protects the workspace APIs', async () => 
     .send({ username: process.env.REQUESTER_USERNAME, password: process.env.REQUESTER_PASSWORD })
     .expect(200);
   assert.equal(loggedIn.body.id, 'requester');
+  assert.equal(loggedIn.body.name, process.env.REQUESTER_NAME);
   assert.match(loggedIn.headers['set-cookie'][0], /HttpOnly/);
   assert.match((await User.findByPk('requester')).passwordHash, /^scrypt\$/);
   const agent = request.agent(app);
@@ -110,13 +109,18 @@ test('approval cannot be requested without documents', async () => {
     .set(requesterHeader)
     .send({ projectId: 'project-1001' })
     .expect(201);
+  assert.deepEqual(created.body.approver, {
+    id: 'user-a',
+    name: process.env.APPROVER_NAME,
+    email: process.env.APPROVER_EMAIL,
+  });
   await request(app)
     .post(`/api/workflows/${created.body.id}/request-approval`)
     .set(requesterHeader)
     .expect(400);
 });
 
-test('approval and signature follow required state transitions and notify User A', async () => {
+test('approval and signature follow required state transitions and notify the configured approver', async () => {
   await resetDatabase();
   const notifications = [];
   const app = createApp({ notify: async (notification) => { notifications.push(notification); } });
@@ -148,7 +152,7 @@ test('approval and signature follow required state transitions and notify User A
   await request(app)
     .post(`/api/workflows/${workflowId}/sign`)
     .set(approverHeader)
-    .send({ signatureName: 'User A', consent: true })
+    .send({ signatureName: process.env.APPROVER_NAME, consent: true })
     .expect(200)
     .expect((response) => assert.equal(response.body.status, 'completed'));
   const events = await AuditEvent.findAll({ where: { workflowId } });

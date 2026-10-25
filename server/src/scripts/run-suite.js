@@ -13,8 +13,11 @@ const testEnvironment = {
   UPLOAD_DIRECTORY: testUploadDirectory,
   REQUESTER_USERNAME: 'requester',
   REQUESTER_PASSWORD: 'Requester-test-password',
+  REQUESTER_NAME: 'Test Requester',
+  REQUESTER_EMAIL: 'requester@example.com',
   APPROVER_USERNAME: 'user-a',
   APPROVER_PASSWORD: 'Approver-test-password',
+  APPROVER_NAME: 'Test Approver',
   APPROVER_EMAIL: 'user.a@example.com',
   SESSION_SECRET: 'test-only-session-secret',
 };

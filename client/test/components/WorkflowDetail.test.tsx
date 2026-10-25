@@ -14,6 +14,7 @@ const approvedWorkflow: Workflow = {
   status: 'approved',
   createdBy: 'requester',
   approverId: 'user-a',
+  approver: { id: 'user-a', name: 'User A', email: 'usera@example.com' },
   createdAt: '2026-01-01T00:00:00.000Z',
   updatedAt: '2026-01-02T00:00:00.000Z',
   submittedAt: '2026-01-01T01:00:00.000Z',
@@ -50,6 +51,9 @@ describe('WorkflowDetail', () => {
     renderWorkflow(false);
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.getByText('User A')).toBeInTheDocument();
+    expect(screen.getByText('usera@example.com')).toBeInTheDocument();
+    expect(screen.getByText('UA')).toBeInTheDocument();
   });
 
   it('opens the signature popup from an email link and submits a signature', async () => {

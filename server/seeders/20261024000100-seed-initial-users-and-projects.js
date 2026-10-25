@@ -1,7 +1,4 @@
-const seededUsers = [
-  { id: 'requester', username: 'requester', name: 'Project Requester', email: 'requester@example.com', role: 'requester' },
-  { id: 'user-a', username: 'user-a', name: 'User A', email: 'gowrish2011@gmail.com', role: 'approver' },
-];
+const seededUserIds = ['requester', 'user-a'];
 
 const seededProjects = [
   {
@@ -27,10 +24,14 @@ const seededProjects = [
 ];
 
 module.exports = {
-  async up(queryInterface) {
+  async up(queryInterface, users) {
+    if (!Array.isArray(users) || users.length !== seededUserIds.length) {
+      throw new Error('Seeded user profiles must be provided by the application configuration.');
+    }
+
     const now = new Date();
     // ignoreDuplicates delegates conflict handling to the database (SQLite OR IGNORE / PostgreSQL ON CONFLICT DO NOTHING).
-    await queryInterface.bulkInsert('users', seededUsers.map((user) => ({ ...user, created_at: now })), {
+    await queryInterface.bulkInsert('users', users.map((user) => ({ ...user, created_at: now })), {
       ignoreDuplicates: true,
     });
     await queryInterface.bulkInsert('projects', seededProjects.map((project) => ({ ...project, created_at: now })), {
@@ -40,6 +41,6 @@ module.exports = {
 
   async down(queryInterface) {
     await queryInterface.bulkDelete('projects', { id: seededProjects.map(({ id }) => id) });
-    await queryInterface.bulkDelete('users', { id: seededUsers.map(({ id }) => id) });
+    await queryInterface.bulkDelete('users', { id: seededUserIds });
   },
 };

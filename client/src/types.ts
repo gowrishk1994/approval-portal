@@ -64,6 +64,7 @@ export interface WorkflowSummary {
 }
 
 export interface Workflow extends WorkflowSummary {
+  approver: Pick<PortalUser, 'id' | 'name'> & { email: string };
   signature: Signature | null;
   auditEvents: AuditEvent[];
 }

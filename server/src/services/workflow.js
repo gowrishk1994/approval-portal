@@ -87,14 +87,20 @@ async function recordAudit({ workflowId, actorId, action, details = {}, transact
 
 async function hydrateWorkflow(workflowId, { includeAuditEvents = false } = {}) {
   const workflowInstance = await requireWorkflow(workflowId);
-  const [documents, auditEvents] = await Promise.all([
+  const [documents, auditEvents, approver] = await Promise.all([
     Document.findAll({ where: { workflowId }, order: [['uploadedAt', 'ASC']] }),
     includeAuditEvents
       ? AuditEvent.findAll({ where: { workflowId }, order: [['createdAt', 'ASC'], ['id', 'ASC']] })
       : Promise.resolve([]),
+    User.findByPk(workflowInstance.approverId, {
+      attributes: ['id', 'name', 'email'],
+      raw: true,
+    }),
   ]);
+  if (!approver) throw new HttpError(500, 'The assigned approver account was not found.');
   const workflow = toWorkflowData(workflowInstance);
   workflow.documents = documents.map((document) => document.get({ plain: true }));
+  workflow.approver = approver;
   if (includeAuditEvents) workflow.auditEvents = auditEvents.map(toAuditEventData);
   return toPublicWorkflow(workflow, { includeAuditEvents });
 }

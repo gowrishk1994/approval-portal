@@ -46,6 +46,7 @@ function makeWorkflow(status: Workflow['status']): Workflow {
     status,
     createdBy: requester.id,
     approverId: approver.id,
+    approver: { id: approver.id, name: approver.name, email: 'approver@example.com' },
     createdAt: '2026-01-01T00:00:00.000Z',
     updatedAt: '2026-01-01T00:00:00.000Z',
     submittedAt: status === 'draft' ? null : '2026-01-01T01:00:00.000Z',
